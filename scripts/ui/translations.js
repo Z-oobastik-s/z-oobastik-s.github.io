@@ -1534,3 +1534,4 @@ window.translations = {
         integrityAnnulApplying: 'Виконується скидання…'
     }
 };
+

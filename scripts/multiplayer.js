@@ -558,3 +558,4 @@ window.multiplayerModule = {
     isMultiplayerActive,
     generateRandomTextByChars
 };
+

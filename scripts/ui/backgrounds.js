@@ -27,3 +27,4 @@ window.BACKGROUNDS = [
     { id: 'bg_light_10', path: 'assets/images/Background/background_white_9.jpg',theme: 'light', cost: 30, name: 'Светлый 10' },
     { id: 'bg_light_11', path: 'assets/images/Background/background_white_10.jpg',theme: 'light',cost: 30, name: 'Светлый 11' }
 ];
+

@@ -124,3 +124,4 @@
         sagaBeatKeyForAct: sagaBeatKeyForAct
     };
 })(typeof window !== 'undefined' ? window : this);
+

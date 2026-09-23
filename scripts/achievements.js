@@ -246,3 +246,4 @@ window.achievementsModule = {
     getAchievements: function () { return ACHIEVEMENTS; },
     COINS_PER_ACHIEVEMENT: COINS_PER_ACHIEVEMENT
 };
+

@@ -24,3 +24,4 @@ module.exports = [
     'assets/images/profile photo/profile_19.jpg',
     'assets/images/profile photo/profile_20.jpg'
 ];
+

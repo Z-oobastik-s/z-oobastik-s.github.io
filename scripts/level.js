@@ -233,3 +233,4 @@ window.levelModule = {
     getLevelUpBonusCoins: getLevelUpBonusCoins,
     bonusCoinsForReachedLevel: bonusCoinsForReachedLevel
 };
+

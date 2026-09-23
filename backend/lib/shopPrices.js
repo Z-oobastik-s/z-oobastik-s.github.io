@@ -234,3 +234,4 @@ function getShopPriceForLesson(lessonId) {
 }
 
 module.exports = { getShopPriceForLesson, SHOP_LESSON_PRICE_BY_ID };
+

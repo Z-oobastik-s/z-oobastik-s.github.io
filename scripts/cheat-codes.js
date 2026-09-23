@@ -137,3 +137,4 @@
 
     setInterval(syncModeAndMaybeReset, 500);
 })();
+

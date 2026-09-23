@@ -860,3 +860,4 @@ window.authModule = {
     getUserBalance,
     isLessonPurchased
 };
+

@@ -42,7 +42,9 @@ const app = {
     _pauseStartAt: null,
     botBattleActive: false,
     lastMatchWasBot: false,
-    botOpponentName: ''
+    botOpponentName: '',
+    /** После урока: ключ пройденного урока - проскроллить список к следующему доступному */
+    _pendingLessonListScrollFromKey: null
 };
 window.app = app;
 
@@ -3350,6 +3352,80 @@ function computeResultSpeedInsights(currentSpeed) {
 }
 
 // Show lesson list - ОПТИМИЗИРОВАНА с DocumentFragment
+function lessonListKeyFor(lesson, levelKey) {
+    if (!lesson) return '';
+    if (lesson.isShopLesson) return 'shop_lesson_' + lesson.id;
+    return 'lesson_' + levelKey + '_' + lesson.id;
+}
+
+/** Следующий доступный (открытый и ещё не пройденный) урок после afterKey, иначе первый такой в главе. */
+function resolveNextPlayableLessonKey(levelData, afterKey) {
+    if (!levelData || !window.statsModule) return afterKey || null;
+    var prog = window.lessonProgressionModule;
+    var full = levelData.lessons || [];
+    var core = prog && typeof prog.getCoreOrderedLessons === 'function'
+        ? prog.getCoreOrderedLessons(full)
+        : full.filter(function (l) { return !l.isShopLesson; });
+    if (!core.length) return afterKey || null;
+
+    function isUnlocked(lesson) {
+        if (lesson.isShopLesson) return true;
+        if (!prog || typeof prog.isLessonUnlocked !== 'function') return true;
+        return prog.isLessonUnlocked(window.statsModule, levelData.level, lesson, full);
+    }
+
+    var startIdx = 0;
+    if (afterKey) {
+        for (var i = 0; i < core.length; i++) {
+            if (lessonListKeyFor(core[i], levelData.level) === afterKey) {
+                startIdx = i + 1;
+                break;
+            }
+        }
+    }
+
+    function firstPlayableFrom(from) {
+        for (var j = from; j < core.length; j++) {
+            var lesson = core[j];
+            if (!isUnlocked(lesson)) continue;
+            var key = lessonListKeyFor(lesson, levelData.level);
+            var st = window.statsModule.getLessonStats(key);
+            if (!st || !st.completed) return key;
+        }
+        return null;
+    }
+
+    var next = firstPlayableFrom(startIdx);
+    if (next) return next;
+    next = firstPlayableFrom(0);
+    if (next) return next;
+    if (startIdx > 0 && startIdx <= core.length) {
+        return lessonListKeyFor(core[Math.min(startIdx, core.length) - 1], levelData.level);
+    }
+    return afterKey || null;
+}
+
+function scrollLessonsListToKey(lessonKey) {
+    if (!lessonKey) return;
+    var container = DOM.get('lessonsList');
+    if (!container) return;
+    var safe = String(lessonKey).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    var card = container.querySelector('.lesson-card[data-lesson-key="' + safe + '"]');
+    if (!card) return;
+    try {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'nearest' });
+    } catch (e) {
+        try { card.scrollIntoView(true); } catch (e2) {}
+    }
+    card.classList.remove('lesson-card--scroll-focus');
+    // reflow so animation can replay
+    void card.offsetWidth;
+    card.classList.add('lesson-card--scroll-focus');
+    setTimeout(function () {
+        try { card.classList.remove('lesson-card--scroll-focus'); } catch (_e) {}
+    }, 1300);
+}
+
 function showLessonList(levelData) {
     currentLevelData = levelData;
     const container = DOM.get('lessonsList');
@@ -3401,6 +3477,7 @@ function showLessonList(levelData) {
         fragment.appendChild(empty);
         container.innerHTML = '';
         container.appendChild(fragment);
+        app._pendingLessonListScrollFromKey = null;
         return;
     }
 
@@ -3462,6 +3539,7 @@ function showLessonList(levelData) {
 
         const card = document.createElement('div');
         card.className = 'lesson-card lesson-card--' + difficultyClass + (unlocked ? '' : ' lesson-card--locked');
+        card.setAttribute('data-lesson-key', lessonKey);
         var payload = { ...lesson, key: lessonKey, difficulty: lessonDifficulty, level: levelData.level };
         if (unlocked) {
             card.onclick = () => startPractice(lesson.text, 'lesson', payload);
@@ -3535,6 +3613,23 @@ function showLessonList(levelData) {
     // Batch update - один раз заменяем весь контент
     container.innerHTML = '';
     container.appendChild(fragment);
+
+    var scrollFrom = app._pendingLessonListScrollFromKey;
+    if (scrollFrom) {
+        app._pendingLessonListScrollFromKey = null;
+        var targetKey = resolveNextPlayableLessonKey(levelData, scrollFrom);
+        requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+                var keyed = targetKey || scrollFrom;
+                var safe = String(keyed).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+                var found = container.querySelector('.lesson-card[data-lesson-key="' + safe + '"]');
+                if (!found && scrollFrom && scrollFrom !== keyed) {
+                    keyed = scrollFrom;
+                }
+                scrollLessonsListToKey(keyed);
+            });
+        });
+    }
 }
 
 /** Полоса «операции» на экране практики - код + бриф. */
@@ -4895,8 +4990,17 @@ function exitPractice() {
         audioWelcome.pause();
         audioWelcome.currentTime = 0;
     }
+
+    var scrollFromKey = null;
+    if (app.currentLesson && (app.currentMode === 'lesson' || app.currentMode === 'practice')) {
+        scrollFromKey = app.currentLesson.key || null;
+        if (!scrollFromKey && currentLevelData) {
+            scrollFromKey = lessonListKeyFor(app.currentLesson, currentLevelData.level || app.currentLesson.level);
+        }
+    }
     
     if (app.currentLesson && currentLevelData) {
+        if (scrollFromKey) app._pendingLessonListScrollFromKey = scrollFromKey;
         showLessons();
         setTimeout(() => showLessonList(currentLevelData), 100);
     } else if (app.currentLesson) {
@@ -10289,3 +10393,4 @@ window.showLevelUpSequence = showLevelUpSequence;
 window.renderLevelBlock = renderLevelBlock;
 window.updateUserUI = updateUserUI;
 window.updateGuestPromisedHeader = updateGuestPromisedHeader;
+
