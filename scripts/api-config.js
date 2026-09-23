@@ -13,4 +13,3 @@
                   window.location.protocol === 'file:';
     window.API_BASE_URL = isLocal ? 'http://localhost:3000' : '';
 })();
-

@@ -1,10 +1,10 @@
-const CACHE_NAME = 'zoobastiks-v178';
+const CACHE_NAME = 'zoobastiks-v179';
 
 self.addEventListener('install', function (event) {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(function (cache) {
-      // Precache only small critical assets - NO videos (they cache on first view)
+      // Лёгкая оболочка: тяжёлые feature-скрипты подтянутся по SWR при первом запросе
       return cache.addAll([
         './',
         './index.html',
@@ -17,22 +17,12 @@ self.addEventListener('install', function (event) {
         './assets/js/keyboard.min.js',
         './assets/js/level.min.js',
         './assets/js/stats.min.js',
+        './assets/js/achievements.min.js',
+        './assets/js/main.min.js',
+        './assets/js/ui/translations.min.js',
+        './assets/js/ui/backgrounds.min.js',
         './scripts/lessons-data.js',
-        './scripts/shop-data.js',
-        './scripts/collectible-cards.js',
-        './scripts/guest-promised-coins.js',
-        './scripts/cheat-codes.js',
-        './scripts/integrity-monitor.js',
-        './scripts/lesson-missions.js',
-        './scripts/lesson-progression.js',
-        './scripts/speed-test-words.js',
-        './scripts/main.js',
-        './scripts/ui/translations.js',
-        './scripts/ui/backgrounds.js',
-        './scripts/features/wpm-chart.js',
-        './scripts/features/heatmap.js',
-        './scripts/features/daily-challenge.js',
-        './scripts/features/bot-battle.js'
+        './scripts/shop-data.js'
       ]).catch(function () {});
     })
   );
@@ -143,4 +133,3 @@ self.addEventListener('fetch', function (event) {
     })
   );
 });
-

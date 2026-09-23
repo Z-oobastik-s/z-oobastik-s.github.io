@@ -153,10 +153,9 @@
     <!-- Preconnect для шрифтов -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <!-- Preload критических ресурсов - загружаются параллельно до парсинга body -->
+    <!-- CSS сразу в head: иначе FOUC-скрытие держит страницу невидимой до конца body -->
     <link rel="preload" href="assets/css/tailwind.min.css" as="style">
-    <link rel="preload" href="scripts/main.js" as="script">
-    <link rel="preload" href="scripts/lessons-data.js" as="script">
+    <link rel="stylesheet" href="assets/css/tailwind.min.css">
     <!-- Шрифты: асинхронная загрузка без блокировки отрисовки (display=swap) -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@400;500&display=swap" as="style">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
@@ -6810,14 +6809,13 @@ Read
         <div class="app-update-sub" data-update-sub>Подождите, загружается новая версия…</div>
     </div>
     <div id="rootScroll" class="h-full min-h-0">
-    <!-- Intro video overlay (plays on each page load) -->
+    <!-- Intro video overlay (skip on repeat visits in the same tab session) -->
     <div id="introOverlay" style="position:fixed; inset:0; z-index:99999; background:#000; display:flex; align-items:center; justify-content:center; pointer-events:auto; overflow:hidden;">
         <video
             id="introVideo"
-            src="assets/video/intro.mp4"
             muted
             playsinline
-            preload="metadata"
+            preload="none"
             style="width:100vw; height:100vh; object-fit:cover; object-position:center; display:block;"
         ></video>
     </div>
@@ -7097,7 +7095,7 @@ Read
                     <div id="homeMascotBubble" class="home-mascot-widget__bubble"></div>
                     <div class="home-mascot-widget__row">
                         <button type="button" id="homeMascotClose" class="home-mascot-widget__close" data-i18n-aria-label="homeMascotCloseAria" aria-label="Закрыть">&times;</button>
-                        <img id="homeMascotImg" class="home-mascot-widget__img" src="assets/animation/Girl_Horse_Sticker.gif" alt="" width="184" height="240" decoding="async" draggable="false" onerror="this.onerror=null;this.src='assets/animation/Girl_Horse_Sticker.png'">
+                        <img id="homeMascotImg" class="home-mascot-widget__img" src="assets/animation/Girl_Horse_Sticker.gif" alt="" width="184" height="240" decoding="async" loading="lazy" fetchpriority="low" draggable="false" onerror="this.onerror=null;this.src='assets/animation/Girl_Horse_Sticker.png'">
                     </div>
                 </div>
             </div>
@@ -7774,7 +7772,7 @@ Read
                         </div>
                         <div id="resultAbabaSticker" class="hidden shrink-0" aria-hidden="true">
                             <div class="result-ababa-clip">
-                                <img class="result-ababa-img" src="assets/animation/Ababa_Sticker.gif" alt="" width="160" height="160" decoding="async" loading="eager" fetchpriority="low">
+                                <img class="result-ababa-img" src="assets/animation/Ababa_Sticker.gif" alt="" width="160" height="160" decoding="async" loading="lazy" fetchpriority="low">
                             </div>
                         </div>
                     </div>
@@ -8505,6 +8503,18 @@ Read
             var video = document.getElementById('introVideo');
             if (!overlay || !video) return;
 
+            // Повторный заход в той же вкладке - без ~2MB видео, сразу на сайт
+            try {
+                if (sessionStorage.getItem('zoob_intro_seen') === '1') {
+                    overlay.style.pointerEvents = 'none';
+                    overlay.style.visibility = 'hidden';
+                    overlay.style.opacity = '0';
+                    try { overlay.remove(); } catch (e) { if (overlay.parentNode) overlay.parentNode.removeChild(overlay); }
+                    return;
+                }
+                sessionStorage.setItem('zoob_intro_seen', '1');
+            } catch (e) {}
+
             // Randomly choose one of the intro videos per page load.
             var sources = ['assets/video/intro.mp4', 'assets/video/intro_1.mp4'];
             var selectedSrc = sources[Math.floor(Math.random() * sources.length)] || sources[0];
@@ -8574,8 +8584,6 @@ Read
             }
         })();
     </script>
-    <!-- Tailwind: pre-built, minified (39KB vs 330KB CDN runtime) -->
-    <link rel="stylesheet" href="assets/css/tailwind.min.css">
     <script>
       (function(){
         function show(){ requestAnimationFrame(function(){ document.documentElement.classList.remove('no-fouc'); }); }
@@ -8585,42 +8593,74 @@ Read
     </script>
     <script src="assets/js/portal-transition.min.js" defer></script>
     <script src="assets/js/api-config.min.js" defer></script>
+    <!-- shop/lessons: source (правило деплоя - правки видны без лишней сборки) -->
     <script src="scripts/lessons-data.js" defer></script>
     <script src="assets/js/themed-texts.min.js" defer></script>
     <script src="scripts/shop-data.js" defer></script>
-    <script src="scripts/lesson-missions.js" defer></script>
-    <script src="scripts/lesson-progression.js" defer></script>
+    <script src="assets/js/lesson-missions.min.js" defer></script>
+    <script src="assets/js/lesson-progression.min.js" defer></script>
     <script src="assets/js/keyboard.min.js" defer></script>
-    <script src="scripts/stats.js" defer></script>
-    <script src="scripts/achievements.js" defer></script>
-    <script src="scripts/level.js" defer></script>
-    <script src="scripts/collectible-cards.js" defer></script>
-    <script src="scripts/guest-promised-coins.js" defer></script>
+    <script src="assets/js/stats.min.js" defer></script>
+    <script src="assets/js/achievements.min.js" defer></script>
+    <script src="assets/js/level.min.js" defer></script>
+    <script src="assets/js/collectible-cards.min.js" defer></script>
+    <script src="assets/js/guest-promised-coins.min.js" defer></script>
     <script type="module" src="assets/js/auth.min.js"></script>
     <!-- UI data modules (extracted from main.js; load before main) -->
-    <script src="scripts/ui/translations.js" defer></script>
-    <script src="scripts/ui/backgrounds.js" defer></script>
-    <!-- Feature modules -->
-    <script src="scripts/features/wpm-chart.js" defer></script>
-    <script src="scripts/features/heatmap.js" defer></script>
-    <script src="scripts/features/daily-challenge.js" defer></script>
-    <script src="scripts/features/bot-battle.js" defer></script>
-    <script src="scripts/speed-test-words.js" defer></script>
-    <!-- Use source main.js (always up-to-date, no build required) -->
-    <script src="scripts/main.js" defer></script>
-    <script src="scripts/cheat-codes.js" defer></script>
-    <script src="scripts/integrity-monitor.js" defer></script>
+    <script src="assets/js/ui/translations.min.js" defer></script>
+    <script src="assets/js/ui/backgrounds.min.js" defer></script>
+    <!-- Extra RU lexicon for speed test - before main so merge sees window.__zoobSpeedTestWords -->
+    <script src="assets/js/speed-test-words.min.js" defer></script>
+    <script src="assets/js/main.min.js" defer></script>
     <script>
         (function(){
-            function loadDeferredModules() {
-                ['assets/js/multiplayer.min.js','scripts/visitor-stats.js'].forEach(function(src){
-                    var s=document.createElement('script'); s.type='module'; s.src=src; document.body.appendChild(s);
+            var DEFERRED = [
+                'assets/js/features/wpm-chart.min.js',
+                'assets/js/features/heatmap.min.js',
+                'assets/js/features/daily-challenge.min.js',
+                'assets/js/features/bot-battle.min.js',
+                'assets/js/cheat-codes.min.js',
+                'assets/js/integrity-monitor.min.js'
+            ];
+            var MODULES = [
+                'assets/js/multiplayer.min.js',
+                'assets/js/visitor-stats.min.js'
+            ];
+            var loadPromise = null;
+
+            function inject(src, asModule) {
+                return new Promise(function(resolve) {
+                    if (document.querySelector('script[data-zoob-src="' + src + '"]')) {
+                        resolve();
+                        return;
+                    }
+                    var s = document.createElement('script');
+                    s.setAttribute('data-zoob-src', src);
+                    if (asModule) s.type = 'module';
+                    s.src = src;
+                    s.onload = function() { resolve(); };
+                    s.onerror = function() { resolve(); };
+                    document.body.appendChild(s);
                 });
             }
-            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ requestIdleCallback ? requestIdleCallback(loadDeferredModules, { timeout: 1500 }) : setTimeout(loadDeferredModules, 500); });
-            else (requestIdleCallback ? requestIdleCallback(loadDeferredModules, { timeout: 1500 }) : setTimeout(loadDeferredModules, 500));
+
+            window.__zoobLoadDeferredScripts = function() {
+                if (loadPromise) return loadPromise;
+                loadPromise = Promise.all(
+                    DEFERRED.map(function(src) { return inject(src, false); })
+                        .concat(MODULES.map(function(src) { return inject(src, true); }))
+                );
+                return loadPromise;
+            };
+
+            function schedule() {
+                var run = function() { window.__zoobLoadDeferredScripts(); };
+                if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 1200 });
+                else setTimeout(run, 400);
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', schedule);
+            else schedule();
         })();
     </script>
 </body>
 </html>
-

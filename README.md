@@ -29,4 +29,3 @@ Zoobastiks, слепая печать, тренажёр печати, typing tut
 ## 📄 Лицензия
 
 MIT License
-

@@ -1503,7 +1503,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }).finally(function () {
         setTimeout(function () {
             initializeAudio();
-            _initSfxPools();
             createParticles();
         }, 0);
     });
@@ -4218,6 +4217,9 @@ function generateRuEnBeginnerUniqueText(poolText, lessonKey, layout, minChars = 
 
 // Start practice - ОПТИМИЗИРОВАНА
 function startPractice(text, mode, lesson = null) {
+    if (typeof window.__zoobLoadDeferredScripts === 'function') {
+        window.__zoobLoadDeferredScripts();
+    }
     if (mode === 'lesson' && lesson && !lesson.isShopLesson && window.lessonProgressionModule && typeof window.lessonProgressionModule.isLessonUnlocked === 'function') {
         var lv = lesson.level || (currentLevelData && currentLevelData.level) || 'beginner';
         var fullList = (currentLevelData && currentLevelData.lessons) ? currentLevelData.lessons : [];
@@ -8311,6 +8313,9 @@ async function deleteUserFromAdmin(uid) {
 
 // Show multiplayer menu
 function showMultiplayerMenu() {
+    if (typeof window.__zoobLoadDeferredScripts === 'function') {
+        window.__zoobLoadDeferredScripts();
+    }
     playMenuClickSound();
     toggleFooter(false); // Скрываем футер в мультиплеере
     hideAllScreens();
@@ -8680,13 +8685,19 @@ function hideBotBattleChrome() {
 }
 
 function startBotBattleFromSettings() {
+    if (typeof window.__zoobLoadDeferredScripts === 'function') {
+        window.__zoobLoadDeferredScripts();
+    }
     const gen = window.multiplayerModule && window.multiplayerModule.generateRandomTextByChars;
-    if (typeof gen !== 'function') {
+    const botReady = window.botBattleModule && typeof window.botBattleModule.start === 'function';
+    if (typeof gen !== 'function' || !botReady) {
         showToast(t('mpBotLoading'), 'info', t('multiplayer'));
         let tries = 0;
         const id = setInterval(() => {
             tries++;
-            if (window.multiplayerModule && typeof window.multiplayerModule.generateRandomTextByChars === 'function') {
+            const g = window.multiplayerModule && window.multiplayerModule.generateRandomTextByChars;
+            const b = window.botBattleModule && typeof window.botBattleModule.start === 'function';
+            if (typeof g === 'function' && b) {
                 clearInterval(id);
                 startBotBattleFromSettings();
             } else if (tries > 28) {
@@ -10278,4 +10289,3 @@ window.showLevelUpSequence = showLevelUpSequence;
 window.renderLevelBlock = renderLevelBlock;
 window.updateUserUI = updateUserUI;
 window.updateGuestPromisedHeader = updateGuestPromisedHeader;
-

@@ -7,4 +7,3 @@ function send500(res, err, logLabel) {
 }
 
 module.exports = { SAFE_INTERNAL, send500 };
-

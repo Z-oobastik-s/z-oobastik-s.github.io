@@ -658,4 +658,3 @@
         tierFromLevel: tierFromLevel
     };
 })(typeof window !== 'undefined' ? window : globalThis);
-

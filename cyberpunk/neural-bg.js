@@ -90,4 +90,3 @@ document.addEventListener('DOMContentLoaded', () => {
         new NeuralNetwork(canvas);
     }
 });
-

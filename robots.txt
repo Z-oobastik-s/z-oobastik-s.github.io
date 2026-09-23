@@ -8,4 +8,3 @@ Sitemap: https://zoobastik.me/zrgb/sitemap.xml
 # Disallow admin panel and other private areas
 Disallow: /admin
 Disallow: /api/
-
