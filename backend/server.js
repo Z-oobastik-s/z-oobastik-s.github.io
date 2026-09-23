@@ -34,4 +34,3 @@ app.use((err, req, res, next) => {
 app.listen(PORT, () => {
     console.log(`Zoobastiks API: port ${PORT}, DB: ${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_DATABASE}`);
 });
-

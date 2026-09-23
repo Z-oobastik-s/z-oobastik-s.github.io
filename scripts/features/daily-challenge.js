@@ -151,4 +151,3 @@
         startCountdownTimer: startCountdownTimer
     };
 })();
-

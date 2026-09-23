@@ -14,4 +14,3 @@ export const firebaseConfig = {
     measurementId: "G-JRVWLZPTCP",
     databaseURL: "https://zwebsitesimulator-default-rtdb.firebaseio.com"
 };
-

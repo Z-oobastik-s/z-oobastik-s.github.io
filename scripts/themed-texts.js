@@ -127,4 +127,3 @@ window.THEMED_TEXTS = {
         }
     }
 };
-

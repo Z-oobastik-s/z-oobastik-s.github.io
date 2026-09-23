@@ -213,4 +213,3 @@ window.keyboardModule = {
     highlightStatic: highlightKeyStatic,
     buildCache: _buildKeyCache
 };
-

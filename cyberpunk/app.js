@@ -765,4 +765,3 @@ document.addEventListener('DOMContentLoaded', () => {
     
     console.log('Initialization complete');
 });
-

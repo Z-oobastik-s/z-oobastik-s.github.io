@@ -45,4 +45,3 @@ router.delete('/users/:uid', requireAdmin, async (req, res) => {
 });
 
 module.exports = router;
-

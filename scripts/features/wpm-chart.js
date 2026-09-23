@@ -226,4 +226,3 @@
         renderChart: renderChart
     };
 })();
-

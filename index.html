@@ -8617,14 +8617,15 @@ Read
     <!-- UI data modules (extracted from main.js; load before main) -->
     <script src="assets/js/ui/translations.min.js" defer></script>
     <script src="assets/js/ui/backgrounds.min.js" defer></script>
+    <!-- График/heatmap нужны с первого урока - иначе при быстром старте модули ещё не успеют подгрузиться -->
+    <script src="assets/js/features/wpm-chart.min.js" defer></script>
+    <script src="assets/js/features/heatmap.min.js" defer></script>
     <!-- Extra RU lexicon for speed test - before main so merge sees window.__zoobSpeedTestWords -->
     <script src="assets/js/speed-test-words.min.js" defer></script>
     <script src="assets/js/main.min.js" defer></script>
     <script>
         (function(){
             var DEFERRED = [
-                'assets/js/features/wpm-chart.min.js',
-                'assets/js/features/heatmap.min.js',
                 'assets/js/features/daily-challenge.min.js',
                 'assets/js/features/bot-battle.min.js',
                 'assets/js/cheat-codes.min.js',
@@ -8672,4 +8673,3 @@ Read
     </script>
 </body>
 </html>
-

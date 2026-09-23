@@ -54,4 +54,3 @@ async function close() {
 }
 
 module.exports = { getPool, query, close };
-
